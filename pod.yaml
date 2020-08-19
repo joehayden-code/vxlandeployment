@@ -1,0 +1,37 @@
+SJCX:
+  GCNPG:
+    vars:
+      name: GCNPG
+      pod_mgt_vlan: 301
+      pod_mgt_net: 10.0.1.0/24
+      pod_mgt_mcast_grp: 239.0.0.8
+      esxi_vmotion_vlan: 321
+      esxi_vmotion_network: 10.0.21.0/24
+      esxi_vmotion_mcast_grp: 239.0.0.8
+      spines:
+        spine-1:
+          port: Eth1/1
+          description: "xxx-device-1 Eth0/0"
+          ipaddress: 10.10.0.1 /30
+        spine-2:
+          port: Eth1/1
+          description: "xxx-device-1 Eth0/1"
+          ipaddress: 10.10.0.5 /30
+  VDPRA:
+    vars:
+      name: VDPRA
+      pod_mgt_vlan: 302
+      pod_mgt_net: 10.0.2.0/24
+      pod_mgt_mcast_grp: 239.0.0.8
+      esxi_vmotion_vlan: 322
+      esxi_vmotion_network: 10.0.22.0/24
+      esxi_vmotion_mcast_grp: 239.0.0.8
+      spines:
+        spine-1:
+          port: Eth1/1
+          description: xxx-device-1 Eth0/0
+          ipaddress: 10.10.9/30
+        spine-2:
+          port: Eth1/1
+          description: xxx-device-1 Eth0/1
+          ipaddress: 10.10.0.13/30
