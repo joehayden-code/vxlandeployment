@@ -1,14 +1,26 @@
 import yaml, os, sys
 from pprint import pprint
 
+# import and parse yaml
+
+# build the spine configuration
+
+# build the bsleaf configuration
+
+# build the pod cleaf configuration
+
+# build the pod management configuration
+
+
 spinedict = {}
 config = ""
-sjcx_spines = ['sjx1-spine-1', 'sjx1-spine-2', 'sjx1-spine-3', 'sjx1-spine-4']
-ascx_spines = ['asx1-spine-1', 'asx1-spine-2', 'asx1-spine-3', 'asx1-spine-4']
-sjcx_bdleaf = ['sjx1-bsleaf-1', 'sjx1-bsleaf-2']
-ascx_bdleaf = ['asx1-bsleaf-1', 'sjx1-bsleaf-2']
+sjcx_spines = ['site1-spine-1', 'site-spine-2', 'site1-spine-3', 'site1-spine-4']
+ascx_spines = ['site2-spine-1', 'site2-spine-2', 'site2-spine-3', 'site2-spine-4']
+sjcx_bdleaf = ['site1-bsleaf-1', 'site1-bsleaf-2']
+ascx_bdleaf = ['site2-bsleaf-1', 'site2-bsleaf-2']
 switch_counter = 1
 rack_counter = 1
+
 
 with open('pod.yaml') as f:
 	data = yaml.load(f, Loader=yaml.FullLoader)
@@ -52,7 +64,7 @@ for k1, v1 in data.items():
 # Build Spine Configuration
 def build_spine_config(name, intf, desc, ip, pod):
 	
-	spineconfig = "***** Configuration for " + name + " for " + pod + " *****\n"
+	spineconfig = "***** Configuration for " + name + " for " + pod + " *****\n\n"
 	spineconfig = spineconfig + "interface " + intf + "\n"
 	spineconfig = spineconfig + "description " + desc + "\n"
 	spineconfig = spineconfig + "mtu 9216\n"
@@ -67,9 +79,42 @@ def build_spine_config(name, intf, desc, ip, pod):
 	spineconfig = spineconfig + "no ip ospf passive interface\n"
 	spineconfig = spineconfig + "ip router ospf 1 area 0.0.0.0\n"
 	spineconfig = spineconfig + "ip pim sparse mode\n"
-	spineconfig = spineconfig + "shut\n\n\n"
+	spineconfig = spineconfig + "shutdown\n\n\n"
 
 	return spineconfig
+
+
+# Build CLEAF configuration
+def build_cleaf_config(name, vlan_num, vlan_name, vni, desc, vrf, svi, mcast_group):
+
+	cleafconfig = "***** Configuration for " + name + " *****\n\n"
+	# Configure L2 VLAN
+	cleafconfig = cleafconfig + "vlan " + vlan_num + "\n"
+	cleafconfig = cleafconfig + "name " + vlan_name + "\n"
+	cleafconfig = cleafconfig + "vn-segment " + vni + "\n\n"
+	# Configurat L3 SVI
+	cleafconfig = cleafconfig + "interface vlan " + vlan_num + "\n"
+	cleafconfig = cleafconfig + "description " + desc + "\n"
+	cleafconfig = cleafconfig + "no shutdown\n"
+	cleafconfig = cleafconfig + "vrf member " + vrf + "\n"
+	cleafconfig = cleafconfig + "ip address " + svi + "\n"
+	cleafconfig = cleafconfig + "no ip redirects\n"
+	cleafconfig = cleafconfig + "no ipv6 redirects\n"
+	cleafconfig = cleafconfig + "fabric forwarding mode anycast-gateway\n"
+	cleafconfig = cleafconfig + "ip dhcp relay address x.x.x.x\n"
+	cleafconfig = cleafconfig + "ip dhcp relay address x.x.x.x\n\n"
+	#Configure VxLAN
+	cleafconfig = cleafconfig + "interface nve1\n"
+	cleafconfig = cleafconfig + "member vni " + vni + "\n"
+	cleafconfig = cleafconfig + "mcast-group " + mcast_group + "\n\n"
+	cleafconfig = cleafconfig + "evpn\n"
+	cleafconfig = cleafconfig + "vni " + vni + "\n"
+	cleafconfig = cleafconfig + "rd auto\n"
+	cleafconfig = cleafconfig + "route-target import auto\n"
+	cleafconfig = cleafconfig + "route-target export auto\n\n\n"
+
+	return cleafconfig
+
 
 #Increment last IP address
 def increment_ip(address, incrementor):
@@ -80,6 +125,7 @@ def increment_ip(address, incrementor):
 	new_network = octet[0] + "." + octet[1] + "." + octet[2] + "." + str(int(octet[3]) + step) + "/" + network[1]
 
 	return new_network
+
 
 # Choose the spine list based on site
 if site == 'SJCX':

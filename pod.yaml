@@ -1,15 +1,15 @@
-SJCX:
-  GCNPG:
+SITE1:
+  PODGCA:
     vars:
       name: GCNPG
       pod_mgt_vlan: 301
       pod_mgt_net: 10.0.1.0/24
-      pod_mgt_mcast_grp: 239.0.0.8
+      pod_mgt_mcast_grp: 200.0.0.0
       esxi_vmotion_vlan: 321
       esxi_vmotion_network: 10.0.21.0/24
-      esxi_vmotion_mcast_grp: 239.0.0.8
+      esxi_vmotion_mcast_grp: 200.0.0.0
       # Below this comment, data is added by CG
-      racks: 3
+      racks: 1
       spines:
         port: Eth1/1
         description: "xxx-device-1 Eth0/0"
