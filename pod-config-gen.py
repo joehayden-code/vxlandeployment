@@ -3,6 +3,12 @@ from pprint import pprint
 
 spinedict = {}
 config = ""
+sjcx_spines = ['sjx1-spine-1', 'sjx1-spine-2', 'sjx1-spine-3', 'sjx1-spine-4']
+ascx_spines = ['asx1-spine-1', 'asx1-spine-2', 'asx1-spine-3', 'asx1-spine-4']
+sjcx_bdleaf = ['sjx1-bsleaf-1', 'sjx1-bsleaf-2']
+ascx_bdleaf = ['asx1-bsleaf-1', 'sjx1-bsleaf-2']
+switch_counter = 1
+rack_counter = 1
 
 with open('pod.yaml') as f:
 	data = yaml.load(f, Loader=yaml.FullLoader)
@@ -31,31 +37,24 @@ for k1, v1 in data.items():
 					esxivmotionnetwork = str(v4)
 				if k4 == 'esxi_vmotion_mcast_grp':
 					esxivmotionmcast = str(v4)
+				if k4 == 'racks':
+					racks = int(v4)
 				if k4 == 'spines':
 					for k5, v5 in v4.items():
-						spine_name = k5
-						for k6, v6 in v5.items():
-							if k6 == 'port':
-								spineport = str(v6)
-							if k6 == 'description':
-								spinedesc = str(v6)
-							if k6 == 'ipaddress':
-								spineipaddr = v6
-						tempdict = {spine_name: {
-						'spine_if': spineport,
-						'spine_if_desc': spinedesc,
-						'spine_if_ipaddr': spineipaddr
-						}}
-						spinedict.update(tempdict)
+						if k5 == 'port':
+							spineport = str(v5)
+						if k5 == 'description':
+							spinedesc = str(v5)
+						if k5 == 'ipaddress':
+							spineipaddr = str(v5)
 						
 
-# Build Spine script
-
-def build_spine_config(name, intf, desc, ip):
+# Build Spine Configuration
+def build_spine_config(name, intf, desc, ip, pod):
 	
-	spineconfig = "***** Configuration for " + name + " *****\n"
+	spineconfig = "***** Configuration for " + name + " for " + pod + " *****\n"
 	spineconfig = spineconfig + "interface " + intf + "\n"
-	spineconfig = spineconfig + "description" + desc + "\n"
+	spineconfig = spineconfig + "description " + desc + "\n"
 	spineconfig = spineconfig + "mtu 9216\n"
 	spineconfig = spineconfig + "link debounce time 0\n"
 	spineconfig = spineconfig + "medium p2p\n"
@@ -67,28 +66,51 @@ def build_spine_config(name, intf, desc, ip):
 	spineconfig = spineconfig + "ip ospf network point-to-point\n"
 	spineconfig = spineconfig + "no ip ospf passive interface\n"
 	spineconfig = spineconfig + "ip router ospf 1 area 0.0.0.0\n"
-	spineconfig = spineconfig + "ip pim sparse mode\n\n"
+	spineconfig = spineconfig + "ip pim sparse mode\n"
+	spineconfig = spineconfig + "shut\n\n\n"
 
 	return spineconfig
 
+#Increment last IP address
+def increment_ip(address, incrementor):
+	
+	network = address.split('/')
+	octet = network[0].split('.')
+	step = incrementor * 4 - 4
+	new_network = octet[0] + "." + octet[1] + "." + octet[2] + "." + str(int(octet[3]) + step) + "/" + network[1]
 
-# Build spine configuration
-for switch, swconfig in spinedict.items():
-	for key, value in swconfig.items():
-		if key == 'spine_if':
-			intf = value
-		if key == 'spine_if_desc':
-			desc = value
-		if key == 'spine_if_ipaddr':
-			ip = value
-	config = config + build_spine_config (switch, intf, desc, ip)
+	return new_network
+
+# Choose the spine list based on site
+if site == 'SJCX':
+	spine_list = sjcx_spines
+	bdleaf_list = sjcx_bdleaf
+if site == 'ASCX':
+	spine_list = ascx_spines
+	bdleaf_list = ascx_bdleaf
 
 
-print (config)
+while rack_counter <= racks:
 
+	rack_name = site + '-' + "!"
 
+	for spine in spine_list:
 
-print()
-print('**********')
-print()
-pprint (spinedict)
+		if spine[-1] == '1':
+			config = build_spine_config(spine, spineport, spinedesc, increment_ip(spineipaddr, switch_counter), podname)
+			print (config)
+		if spine[-1] == '2':
+			config = build_spine_config(spine, spineport, spinedesc, increment_ip(spineipaddr, switch_counter), podname)
+			print (config)
+		if spine[-1] == '3':
+			config = build_spine_config(spine, spineport, spinedesc, increment_ip(spineipaddr, switch_counter), podname)
+			print (config)
+		if spine[-1] == '4':
+			config = build_spine_config(spine, spineport, spinedesc, increment_ip(spineipaddr, switch_counter), podname)
+			print (config)
+
+		switch_counter += 1
+
+	switch_counter = 1
+	rack_counter += 1
+
