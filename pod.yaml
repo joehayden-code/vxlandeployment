@@ -9,11 +9,17 @@ SITE1:
       esxi_vmotion_network: 10.0.21.0/24
       esxi_vmotion_mcast_grp: 200.0.0.0
       # Below this comment, data is added by CG
-      racks: 1
+      racks: 3
       spines:
         port: Eth1/1
         description: "xxx-device-1 Eth0/0"
         ipaddress: 10.10.0.1/30
-      # podcleafs:
-      #   ipaddress: 10.10.0.2/30
-      # podmgt:
+      podcleafs:
+        vlan_name: compute_vlan_301
+        svi_ipaddress: 10.10.0.2/30
+        svd_description: compute vlan
+        vrf: production
+      podmgt:
+        ipaddress: 10.10.0.51/30
+        asn: 12345
+        

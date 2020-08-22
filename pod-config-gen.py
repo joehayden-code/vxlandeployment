@@ -14,10 +14,10 @@ from pprint import pprint
 
 spinedict = {}
 config = ""
-sjcx_spines = ['site1-spine-1', 'site-spine-2', 'site1-spine-3', 'site1-spine-4']
-ascx_spines = ['site2-spine-1', 'site2-spine-2', 'site2-spine-3', 'site2-spine-4']
-sjcx_bdleaf = ['site1-bsleaf-1', 'site1-bsleaf-2']
-ascx_bdleaf = ['site2-bsleaf-1', 'site2-bsleaf-2']
+site1_spines = ['site1-spine-1', 'site-spine-2', 'site1-spine-3', 'site1-spine-4']
+site2_spines = ['site2-spine-1', 'site2-spine-2', 'site2-spine-3', 'site2-spine-4']
+site1_bdleaf = ['site1-bsleaf-1', 'site1-bsleaf-2']
+site2_bdleaf = ['site2-bsleaf-1', 'site2-bsleaf-2']
 switch_counter = 1
 rack_counter = 1
 
@@ -116,6 +116,9 @@ def build_cleaf_config(name, vlan_num, vlan_name, vni, desc, vrf, svi, mcast_gro
 	return cleafconfig
 
 
+
+
+
 #Increment last IP address
 def increment_ip(address, incrementor):
 	
@@ -128,17 +131,21 @@ def increment_ip(address, incrementor):
 
 
 # Choose the spine list based on site
-if site == 'SJCX':
-	spine_list = sjcx_spines
-	bdleaf_list = sjcx_bdleaf
-if site == 'ASCX':
-	spine_list = ascx_spines
-	bdleaf_list = ascx_bdleaf
+if site == 'SITE1':
+	spine_list = site1_spines
+	bdleaf_list = site1_bdleaf
+if site == 'SITE2':
+	spine_list = site2_spines
+	bdleaf_list = site2_bdleaf
 
 
-while rack_counter <= racks:
+for r in range (1, racks + 1):
 
-	rack_name = site + '-' + "!"
+	# SJX1-CLEAF01-VDPRAR1
+	cleaf1_name = site + '-CLEAF01-' + podname + "R" + str(r)
+	cleaf2_name = site + '-CLEAF02-' + podname + "R" + str(r)
+	mgt_name = site + '-MGT01-' + podname + "R" + str(r)
+
 
 	for spine in spine_list:
 
@@ -158,5 +165,4 @@ while rack_counter <= racks:
 		switch_counter += 1
 
 	switch_counter = 1
-	rack_counter += 1
 
